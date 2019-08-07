@@ -7,7 +7,7 @@ from torch.nn.functional import mse_loss
 
 class PSNR(Metric):
     """
-    Peak Signal-to-Noise Ratio (UNTESTED):
+    Peak Signal-to-Noise Ratio:
 
     PSNR = 10 log_10( MAX^2_I / MSE) = 20 log_10(MAX_I) - 10 log_10 (MSE)
 
