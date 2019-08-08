@@ -63,13 +63,14 @@ class DeepLaplacianPyramidNet(nn.Module):
         self.max_scale_factor = max_scale_factor
 
         scale = 2
-        layers = []
+        features_branch = []
         to_residuals = []
+        upsample_layers = []
         in_channels = 3
 
         while scale <= self.max_scale_factor:
             out_channels = 16 if in_channels < 4 else in_channels * 2
-            layers += [
+            features_branch += [
                 PixelShuffleConvolutionLayer(
                     in_channels=in_channels, out_channels=out_channels,
                     normalization=nn.Identity, upscale_factor=2
@@ -79,11 +80,18 @@ class DeepLaplacianPyramidNet(nn.Module):
             to_residuals.append(
                 ConvolutionalLayer(in_channels=out_channels, out_channels=3, activation=nn.Identity, padding=1)
             )
+            upsample_layers.append(
+                PixelShuffleConvolutionLayer(
+                    in_channels=3, out_channels=3,
+                    normalization=nn.Identity, upscale_factor=2
+                )
+            )
             in_channels = out_channels
             scale *= 2
 
-        self.layers = nn.ModuleList(layers)
+        self.features_branch = nn.ModuleList(features_branch)
         self.to_residuals = nn.ModuleList(to_residuals)
+        self.upsample_layers = nn.ModuleList(upsample_layers)
 
     def forward(self, input: Tensor, upscale_factor: Optional[int]=None) -> Tensor:
         scale = 2
@@ -91,9 +99,10 @@ class DeepLaplacianPyramidNet(nn.Module):
         output = input
 
         while scale <= upscale_factor:
-            upsampled = F.interpolate(output, scale_factor=2)
+            # upsampled = F.interpolate(output, scale_factor=2)
+            upsampled = self.upsample_layers[int(np.log2(scale)) - 1](output)
             for i in range((int(np.log2(scale)) - 1) * 2, int(np.log2(scale)) * 2):
-                feature = self.layers[i](feature)
+                feature = self.features_branch[i](feature)
 
             residual = self.to_residuals[int(np.log2(scale)) - 1](feature)
             output = residual + upsampled
@@ -109,9 +118,10 @@ class DeepLaplacianPyramidNet(nn.Module):
         output = input
 
         while scale <= self.max_scale_factor:
-            upsampled = F.interpolate(output, scale_factor=2)
+            # upsampled = F.interpolate(output, scale_factor=2)
+            upsampled = self.upsample_layers[int(np.log2(scale)) - 1](output)
             for i in range((int(np.log2(scale)) - 1) * 2, int(np.log2(scale)) * 2):
-                feature = self.layers[i](feature)
+                feature = self.features_branch[i](feature)
 
             residual = self.to_residuals[int(np.log2(scale)) - 1](feature)
             output = residual + upsampled
