@@ -90,7 +90,7 @@ class DeepLaplacianPyramidNet(nn.Module):
         feature = input
         output = input
 
-        while scale <= self.max_scale_factor:
+        while scale <= upscale_factor:
             upsampled = F.interpolate(output, scale_factor=2)
             for i in range((int(np.log2(scale)) - 1) * 2, int(np.log2(scale)) * 2):
                 feature = self.layers[i](feature)
