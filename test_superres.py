@@ -3,7 +3,7 @@ from src.learner import SuperResolutionLearner, MultiResolutionLearner
 from src.models import PixelShuffleUpsampler, DeepLaplacianPyramidNet
 
 from nntoolbox.vision.utils import UnlabelledImageListDataset, UnsupervisedFromSupervisedDataset
-from nntoolbox.vision.losses import CharbonierLoss, CharbonierLossV2
+from nntoolbox.vision.losses import CharbonnierLoss, CharbonnierLossV2
 from nntoolbox.callbacks import Tensorboard, LossLogger, \
     ModelCheckpoint, ToDeviceCallback
 
@@ -49,7 +49,7 @@ print("Finish creating model")
 optimizer = Adam(model.parameters())
 learner = MultiResolutionLearner(
     dataloader, dataloader_val,
-    model, criterion=CharbonierLossV2(), optimizer=optimizer
+    model, criterion=CharbonnierLossV2(), optimizer=optimizer
 )
 
 metrics = {
