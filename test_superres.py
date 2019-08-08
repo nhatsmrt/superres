@@ -28,7 +28,7 @@ images = UnlabelledImageListDataset("data/train2014/", transform=Compose(
 
 # images = UnsupervisedFromSupervisedDataset(CIFAR10(root="data/CIFAR/", download=True, train=True, transform=ToTensor()))
 
-upscale_factor = 8
+upscale_factor = 4
 batch_size = 64
 
 print("Begin splitting data")
@@ -44,7 +44,7 @@ dataloader_val = DataLoader(val_dataset, batch_size=batch_size)
 
 print("Creating models")
 
-model = DeepLaplacianPyramidNet(max_scale_factor=8)
+model = DeepLaplacianPyramidNet(max_scale_factor=upscale_factor)
 print("Finish creating model")
 optimizer = Adam(model.parameters())
 learner = MultiResolutionLearner(
