@@ -1,6 +1,6 @@
-from src.metrics import PSNR
-from src.learner import SuperResolutionLearner, MultiResolutionLearner
-from src.models import PixelShuffleUpsampler, DeepLaplacianPyramidNet
+from superres.metrics import PSNR
+from superres.learner import SuperResolutionLearner, MultiResolutionLearner
+from superres.models import PixelShuffleUpsampler, DeepLaplacianPyramidNet
 
 from nntoolbox.vision.utils import UnlabelledImageListDataset, UnsupervisedFromSupervisedDataset
 from nntoolbox.vision.losses import CharbonnierLoss, CharbonnierLossV2
