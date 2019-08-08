@@ -19,14 +19,14 @@ mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
 print("Begin creating dataset")
-# images = UnlabelledImageListDataset("data/train2014/", transform=Compose(
-#     [
-#         Resize(512),
-#         RandomCrop((256, 256))
-#     ]
-# ))
+images = UnlabelledImageListDataset("data/train2014/", transform=Compose(
+    [
+        Resize(512),
+        RandomCrop((256, 256))
+    ]
+))
 
-images = UnsupervisedFromSupervisedDataset(CIFAR10(root="data/CIFAR/", download=True, train=True, transform=ToTensor()))
+# images = UnsupervisedFromSupervisedDataset(CIFAR10(root="data/CIFAR/", download=True, train=True, transform=ToTensor()))
 
 upscale_factor = 8
 batch_size = 64
