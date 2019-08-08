@@ -166,6 +166,7 @@ class MultiResolutionLearner(Learner):
         loss = 0
         for i in range(len(pyramid) - 1):
             loss = loss + self._criterion(generated_pyramid[i], pyramid[i + 1])
+        loss = loss / (len(pyramid) - 1)
         return self._cb_handler.after_losses({"loss": loss}, train)["loss"]
 
     @torch.no_grad()

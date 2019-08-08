@@ -77,7 +77,7 @@ class DeepLaplacianPyramidNet(nn.Module):
                 CustomResidualBlockPreActivation(in_channels=out_channels, normalization=nn.Identity)
             ]
             to_residuals.append(
-                ConvolutionalLayer(in_channels=out_channels, out_channels=3, activation=nn.Identity)
+                ConvolutionalLayer(in_channels=out_channels, out_channels=3, activation=nn.Identity, padding=1)
             )
             in_channels = out_channels
             scale *= 2
