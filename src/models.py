@@ -78,7 +78,10 @@ class DeepLaplacianPyramidNet(nn.Module):
                 CustomResidualBlockPreActivation(in_channels=out_channels, normalization=nn.Identity)
             ]
             to_residuals.append(
-                ConvolutionalLayer(in_channels=out_channels, out_channels=3, activation=nn.Identity, padding=1)
+                ConvolutionalLayer(
+                    in_channels=out_channels, out_channels=3, padding=1,
+                    activation=nn.Identity, normalization=nn.Identity
+                )
             )
             upsample_layers.append(
                 PixelShuffleConvolutionLayer(
