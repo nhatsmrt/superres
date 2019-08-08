@@ -82,7 +82,7 @@ class DeepLaplacianPyramidNet(nn.Module):
             )
             upsample_layers.append(
                 PixelShuffleConvolutionLayer(
-                    in_channels=3, out_channels=3,
+                    in_channels=3, out_channels=3, activation=nn.Identity,
                     normalization=nn.Identity, upscale_factor=2
                 )
             )
@@ -92,6 +92,7 @@ class DeepLaplacianPyramidNet(nn.Module):
         self.features_branch = nn.ModuleList(features_branch)
         self.to_residuals = nn.ModuleList(to_residuals)
         self.upsample_layers = nn.ModuleList(upsample_layers)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, input: Tensor, upscale_factor: Optional[int]=None) -> Tensor:
         scale = 2
@@ -105,7 +106,7 @@ class DeepLaplacianPyramidNet(nn.Module):
                 feature = self.features_branch[i](feature)
 
             residual = self.to_residuals[int(np.log2(scale)) - 1](feature)
-            output = residual + upsampled
+            output = self.sigmoid(residual + upsampled)
             scale *= 2
 
         return output
@@ -124,7 +125,7 @@ class DeepLaplacianPyramidNet(nn.Module):
                 feature = self.features_branch[i](feature)
 
             residual = self.to_residuals[int(np.log2(scale)) - 1](feature)
-            output = residual + upsampled
+            output = self.sigmoid(residual + upsampled)
             outputs.append(output)
             scale *= 2
 
