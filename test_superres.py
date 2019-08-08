@@ -21,7 +21,7 @@ std = [0.229, 0.224, 0.225]
 print("Begin creating dataset")
 images = UnlabelledImageListDataset("data/train2014/", transform=Compose(
     [
-        # Resize((128, 128))
+        Resize((512, 512)),
         RandomCrop((128, 128))
     ]
 ))
