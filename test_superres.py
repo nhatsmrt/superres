@@ -54,7 +54,7 @@ learner = MultiResolutionLearner(
 )
 
 metrics = {
-    "psnr": PSNR(),
+    "psnr": PSNR(batch_size=batch_size),
     "ssim": SSIM()
 }
 
