@@ -1,6 +1,7 @@
 from torch import nn, Tensor
 import torch.nn.functional as F
 from nntoolbox.vision.components import PixelShuffleConvolutionLayer, ResNeXtBlock, ConvolutionalLayer
+from nntoolbox.components import ScalingLayer
 from typing import List, Optional
 import numpy as np
 
@@ -21,6 +22,29 @@ class CustomResidualBlockPreActivation(ResNeXtBlock):
                             in_channels, in_channels, 3, padding=0,
                             activation=activation, normalization=normalization
                         )
+                    )
+                ]
+            ),
+            use_shake_shake=False
+        )
+
+
+class CustomResidualBlock(ResNeXtBlock):
+    def __init__(self, in_channels, activation=nn.ReLU, normalization=nn.Identity):
+        super(CustomResidualBlock, self).__init__(
+            branches=nn.ModuleList(
+                [
+                    nn.Sequential(
+                        nn.ReplicationPad2d(1),
+                        ConvolutionalLayer(
+                            in_channels, in_channels, 3, padding=0,
+                            activation=activation, normalization=normalization
+                        ),
+                        nn.ReplicationPad2d(1),
+                        nn.Conv2d(
+                            in_channels, in_channels, 3, padding=0
+                        ),
+                        ScalingLayer()
                     )
                 ]
             ),
@@ -75,12 +99,15 @@ class DeepLaplacianPyramidNet(nn.Module):
                     in_channels=in_channels, out_channels=out_channels,
                     normalization=nn.Identity, upscale_factor=2
                 ),
-                CustomResidualBlockPreActivation(in_channels=out_channels, normalization=nn.Identity)
+                CustomResidualBlock(in_channels=out_channels, normalization=nn.Identity)
             ]
             to_residuals.append(
-                ConvolutionalLayer(
-                    in_channels=out_channels, out_channels=3, padding=1,
-                    activation=nn.Identity, normalization=nn.Identity
+                nn.Sequential(
+                    ConvolutionalLayer(
+                        in_channels=out_channels, out_channels=3, padding=1,
+                        activation=nn.Identity, normalization=nn.Identity
+                    ),
+                    ScalingLayer()
                 )
             )
             upsample_layers.append(

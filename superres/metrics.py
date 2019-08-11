@@ -18,7 +18,7 @@ class PSNR(Metric):
     def __init__(self):
         self._best = float('-inf')
 
-    def __call__(self, logs: Dict[str, Any]):
+    def __call__(self, logs: Dict[str, Any]) -> float:
         outputs = (logs['outputs'] * 255).to(torch.uint8).to(torch.float32)
         labels = (logs['labels'] * 255).to(torch.uint8).to(torch.float32)
         mse = mse_loss(outputs, labels).cpu().detach().numpy()
