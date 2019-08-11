@@ -6,6 +6,7 @@ from nntoolbox.vision.utils import UnlabelledImageListDataset, UnsupervisedFromS
 from nntoolbox.vision.losses import CharbonnierLoss, CharbonnierLossV2
 from nntoolbox.callbacks import Tensorboard, LossLogger, \
     ModelCheckpoint, ToDeviceCallback
+from generative_models.metrics import SSIM
 
 import torch
 from torch import nn
@@ -53,7 +54,8 @@ learner = MultiResolutionLearner(
 )
 
 metrics = {
-    "psnr": PSNR()
+    "psnr": PSNR(),
+    "ssim": SSIM()
 }
 
 callbacks = [
@@ -63,4 +65,4 @@ callbacks = [
     # lr_scheduler,
     ModelCheckpoint(learner=learner, save_best_only=False, filepath='weights/model.pt'),
 ]
-learner.learn(n_epoch=100, metrics=metrics, callbacks=callbacks, max_upscale_factor=upscale_factor, final_metric='psnr')
+learner.learn(n_epoch=100, metrics=metrics, callbacks=callbacks, max_upscale_factor=upscale_factor, final_metric='ssim')
