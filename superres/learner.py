@@ -83,14 +83,14 @@ class SuperResolutionLearner(Learner):
             outputs.append(generated)
             labels.append(high_res)
 
-            for i in range(min(len(low_res), 8)):
-                imgs.append(high_res[i])
-                imgs.append(low_res[i])
-                imgs.append(generated[i])
-                tags.append("high_res_" + str(i))
-                tags.append("low_res_" + str(i))
-                tags.append("generated_res_" + str(i))
-            break
+            if len(imgs) < 8:
+                for i in range(min(len(low_res), 8 - len(imgs))):
+                    imgs.append(high_res[i])
+                    imgs.append(low_res[i])
+                    imgs.append(generated[i])
+                    tags.append("high_res_" + str(i))
+                    tags.append("low_res_" + str(i))
+                    tags.append("generated_res_" + str(i))
 
         outputs = torch.cat(outputs, dim=0)
         labels = torch.cat(labels, dim=0)
@@ -186,14 +186,15 @@ class MultiResolutionLearner(Learner):
             outputs.append(generated)
             labels.append(high_res)
 
-            for i in range(min(len(low_res), 8)):
-                imgs.append(high_res[i])
-                imgs.append(low_res[i])
-                imgs.append(generated[i])
-                tags.append("high_res_" + str(i))
-                tags.append("low_res_" + str(i))
-                tags.append("generated_res_" + str(i))
-            break
+            if len(imgs) < 8:
+                for i in range(min(len(low_res), 8 - len(imgs))):
+                    imgs.append(high_res[i])
+                    imgs.append(low_res[i])
+                    imgs.append(generated[i])
+                    tags.append("high_res_" + str(i))
+                    tags.append("low_res_" + str(i))
+                    tags.append("generated_res_" + str(i))
+            # break
 
         outputs = torch.cat(outputs, dim=0)
         labels = torch.cat(labels, dim=0)
