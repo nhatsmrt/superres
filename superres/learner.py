@@ -11,8 +11,9 @@ import numpy as np
 
 class SuperResolutionLearner(Learner):
     def learn(
-            self, n_epoch: int, upscale_factor: int, callbacks: Iterable[Callback]=None,
-            metrics: Dict[str, Metric]=None, final_metric: str='accuracy', load_path=None
+            self, n_epoch: int, upscale_factor: int, downsampling_mode: str='nearest',
+            callbacks: Iterable[Callback]=None, metrics: Dict[str, Metric]=None,
+            final_metric: str='accuracy', load_path=None
     ) -> float:
 
         assert upscale_factor > 1
@@ -21,6 +22,8 @@ class SuperResolutionLearner(Learner):
             load_model(self._model, load_path)
 
         self.scale_factor = 1.0 / upscale_factor
+        self.downsampling_mode = downsampling_mode
+
 
         self._cb_handler = CallbackHandler(self, n_epoch, callbacks, metrics, final_metric)
         self._cb_handler.on_train_begin()
@@ -40,7 +43,7 @@ class SuperResolutionLearner(Learner):
         return self._cb_handler.on_train_end()
 
     def learn_one_iter(self, high_res: Tensor):
-        low_res = F.interpolate(high_res, scale_factor=self.scale_factor)
+        low_res = F.interpolate(high_res, scale_factor=self.scale_factor, mode=self.downsampling_mode)
 
         data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, True)
         high_res, low_res = data['high_res'], data['low_res']
@@ -108,8 +111,9 @@ class MultiResolutionLearner(Learner):
         https://arxiv.org/pdf/1704.03915.pdf
     """
     def learn(
-            self, n_epoch: int, max_upscale_factor: int, callbacks: Iterable[Callback]=None,
-            metrics: Dict[str, Metric]=None, final_metric: str='accuracy', load_path=None
+            self, n_epoch: int, max_upscale_factor: int, downsampling_mode: str='nearest',
+            callbacks: Iterable[Callback]=None, metrics: Dict[str, Metric]=None,
+            final_metric: str='accuracy', load_path=None
     ) -> float:
 
         assert max_upscale_factor > 1
@@ -119,6 +123,7 @@ class MultiResolutionLearner(Learner):
 
         self.scale_factors = [1.0 / 2 ** i for i in range(int(np.log2(max_upscale_factor)) + 1)][::-1]
         self.max_upscale_factor = max_upscale_factor
+        self.downsampling_mode = downsampling_mode
 
         self._cb_handler = CallbackHandler(self, n_epoch, callbacks, metrics, final_metric)
         self._cb_handler.on_train_begin()
@@ -138,7 +143,10 @@ class MultiResolutionLearner(Learner):
         return self._cb_handler.on_train_end()
 
     def learn_one_iter(self, high_res: Tensor):
-        pyramid = [F.interpolate(high_res, scale_factor=scale) for scale in self.scale_factors if scale != 1.0]
+        pyramid = [
+            F.interpolate(high_res, scale_factor=scale, mode=self.downsampling_mode)
+            for scale in self.scale_factors if scale != 1.0
+        ]
         pyramid += [high_res]
 
         data = self._cb_handler.on_batch_begin({'pyramid_' + str(i): pyramid[i] for i in range(len(pyramid))}, True)
