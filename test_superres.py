@@ -79,4 +79,4 @@ callbacks = [
     # lr_scheduler,
     ModelCheckpoint(learner=learner, save_best_only=False, filepath='weights/model.pt'),
 ]
-learner.learn(n_epoch=100, metrics=metrics, callbacks=callbacks, max_upscale_factor=upscale_factor, final_metric='ssim')
+learner.learn(n_epoch=5, metrics=metrics, callbacks=callbacks, max_upscale_factor=upscale_factor, final_metric='ssim')
