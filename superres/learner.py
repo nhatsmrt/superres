@@ -88,7 +88,10 @@ class SuperResolutionLearner(Learner):
             data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, False)
             high_res, low_res = data['high_res'], data['low_res']
             generated = self.generate(low_res, False)
-
+            low_res = torch.clamp(
+                F.interpolate(low_res, scale_factor=1.0 / self.scale_factors[0], mode=self.downsampling_mode), 0.0, 1.0
+            )
+            
             outputs.append(generated)
             labels.append(high_res)
 
@@ -199,6 +202,9 @@ class MultiResolutionLearner(Learner):
         data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, False)
         high_res, low_res = data['high_res'], data['low_res']
         generated = self._model(low_res, self.max_upscale_factor)
+        low_res = torch.clamp(
+            F.interpolate(low_res, scale_factor=1.0 / self.scale_factors[0], mode=self.downsampling_mode), 0.0, 1.0
+        )
 
         outputs.append(generated.detach())
         labels.append(high_res.detach())
