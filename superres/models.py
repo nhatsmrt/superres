@@ -223,12 +223,16 @@ class DeepLaplacianPyramidNetV2(nn.Module):
             ),
             recursive_level=5
         )
-        self.feature_upsampling = PixelShuffleConvolutionLayer(in_channels=64, out_channels=64, upscale_factor=2)
+        self.feature_upsampling = PixelShuffleConvolutionLayer(
+            in_channels=64, out_channels=64, upscale_factor=2, activation=leaky_relu, normalization=nn.Identity
+        )
 
-        self.upsampling = PixelShuffleConvolutionLayer(in_channels=3, out_channels=3, upscale_factor=2)
+        self.upsampling = PixelShuffleConvolutionLayer(
+            in_channels=3, out_channels=3, upscale_factor=2, activation=nn.Identity, normalization=nn.Identity
+        )
         self.conv_res = ConvolutionalLayer(
             in_channels=64, out_channels=3, padding=1,
-            activation=leaky_relu, normalization=nn.Identity
+            activation=nn.Identity, normalization=nn.Identity
         )
         self.sigmoid = nn.Sigmoid()
 
