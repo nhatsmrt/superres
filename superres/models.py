@@ -6,6 +6,9 @@ from typing import List, Optional
 import numpy as np
 
 
+def leaky_relu(): return nn.LeakyReLU(0.2, True)
+
+
 class CustomResidualBlockPreActivation(ResNeXtBlock):
     def __init__(self, in_channels, activation=nn.ReLU, normalization=nn.BatchNorm2d):
         super(CustomResidualBlockPreActivation, self).__init__(
@@ -180,16 +183,16 @@ class DeepLaplacianPyramidNetV2(nn.Module):
 
         self.conv_in = ConvolutionalLayer(
             in_channels=3, out_channels=64, padding=1,
-            activation=nn.LeakyReLU, normalization=nn.Identity
+            activation=leaky_relu, normalization=nn.Identity
         )
         self.feature_embedding = nn.Sequential(
-            CustomResidualBlock(in_channels=64),
+            CustomResidualBlock(in_channels=64, activation=leaky_relu, normalization=nn.Identity),
             PixelShuffleConvolutionLayer(in_channels=64, out_channels=64, upscale_factor=2)
         )
         self.upsampling = PixelShuffleConvolutionLayer(in_channels=3, out_channels=3, upscale_factor=2)
         self.conv_res = ConvolutionalLayer(
             in_channels=64, out_channels=3, padding=1,
-            activation=nn.LeakyReLU, normalization=nn.Identity
+            activation=leaky_relu, normalization=nn.Identity
         )
         self.sigmoid = nn.Sigmoid()
 
