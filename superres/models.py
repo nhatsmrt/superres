@@ -165,6 +165,30 @@ class DeepLaplacianPyramidNet(nn.Module):
         return outputs
 
 
+class RecursiveResidualBlock(nn.Module):
+    def __init__(
+            self, recursive_block: nn.Module, recursive_level: int, mode: str='ss'
+    ):
+        """
+        :param recursive_block: recursive block
+        :param recursive_level: number of times to repeat the recursive block
+        :param mode: if 'ss', use single-source local residual learning (i.e skip connection from original input).
+        Else if 'ds , use skip connection from previous recursion level output.
+        """
+        super(RecursiveResidualBlock, self).__init__()
+        assert mode == 'ss' or mode == 'ds'
+        self.recursive_block = recursive_block
+        self.recursive_level = recursive_level
+        self.mode = mode
+
+    def forward(self, input: Tensor) -> Tensor:
+        output = input
+        for r in range(self.recursive_level):
+            if self.mode == 'ss': output = input + self.recursive_block(output)
+            else: output = output + self.recursive_block(output)
+        return output
+
+
 class DeepLaplacianPyramidNetV2(nn.Module):
     """
     Second version of deep laplacian pyramid net, which reuses the layers recursively
@@ -185,10 +209,22 @@ class DeepLaplacianPyramidNetV2(nn.Module):
             in_channels=3, out_channels=64, padding=1,
             activation=leaky_relu, normalization=nn.Identity
         )
-        self.feature_embedding = nn.Sequential(
-            CustomResidualBlock(in_channels=64, activation=leaky_relu, normalization=nn.Identity),
-            PixelShuffleConvolutionLayer(in_channels=64, out_channels=64, upscale_factor=2)
+        self.feature_embedding = RecursiveResidualBlock(
+            # CustomResidualBlock(in_channels=64, activation=leaky_relu, normalization=nn.Identity),
+            nn.Sequential(
+                ConvolutionalLayer(
+                    in_channels=64, out_channels=64, activation=leaky_relu,
+                    kernel_size=3, padding=1, normalization=nn.Identity
+                ),
+                ConvolutionalLayer(
+                    in_channels=64, out_channels=64, activation=leaky_relu,
+                    kernel_size=3, padding=1, normalization=nn.Identity
+                )
+            ),
+            recursive_level=5
         )
+        self.feature_upsampling = PixelShuffleConvolutionLayer(in_channels=64, out_channels=64, upscale_factor=2)
+
         self.upsampling = PixelShuffleConvolutionLayer(in_channels=3, out_channels=3, upscale_factor=2)
         self.conv_res = ConvolutionalLayer(
             in_channels=64, out_channels=3, padding=1,
@@ -203,7 +239,7 @@ class DeepLaplacianPyramidNetV2(nn.Module):
 
         while scale <= upscale_factor:
             upsampled = self.upsampling(output)
-            feature = self.feature_embedding(feature)
+            feature = self.feature_upsampling(self.feature_embedding(feature))
 
             residual = self.conv_res(feature)
             output = self.sigmoid(residual + upsampled)
@@ -219,7 +255,7 @@ class DeepLaplacianPyramidNetV2(nn.Module):
 
         while scale <= self.max_scale_factor:
             upsampled = self.upsampling(output)
-            feature = self.feature_embedding(feature)
+            feature = self.feature_upsampling(self.feature_embedding(feature))
 
             residual = self.conv_res(feature)
             output = self.sigmoid(residual + upsampled)

@@ -183,8 +183,8 @@ class MultiResolutionLearner(Learner):
             high_res, low_res = data['high_res'], data['low_res']
             generated = self._model(low_res, self.max_upscale_factor)
 
-            outputs.append(generated)
-            labels.append(high_res)
+            outputs.append(generated.detach())
+            labels.append(high_res.detach())
 
             if len(imgs) < 8:
                 for i in range(min(len(low_res), 8 - len(imgs))):
