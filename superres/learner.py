@@ -1,5 +1,5 @@
 from nntoolbox.learner import Learner
-from nntoolbox.utils import load_model, get_device
+from nntoolbox.utils import load_model, get_device, grab_next_batch
 from nntoolbox.callbacks import Callback, CallbackHandler
 from nntoolbox.metrics import Metric
 from typing import Iterable, Dict, List
@@ -177,23 +177,24 @@ class MultiResolutionLearner(Learner):
         outputs = []
         labels = []
 
-        for high_res in self._val_data:
-            low_res = F.interpolate(high_res, scale_factor=self.scale_factors[0])
-            data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, False)
-            high_res, low_res = data['high_res'], data['low_res']
-            generated = self._model(low_res, self.max_upscale_factor)
+        # for high_res in self._val_data:
+        high_res = grab_next_batch(self._val_data)
+        low_res = F.interpolate(high_res, scale_factor=self.scale_factors[0])
+        data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, False)
+        high_res, low_res = data['high_res'], data['low_res']
+        generated = self._model(low_res, self.max_upscale_factor)
 
-            outputs.append(generated.detach())
-            labels.append(high_res.detach())
+        outputs.append(generated.detach())
+        labels.append(high_res.detach())
 
-            if len(imgs) < 8:
-                for i in range(min(len(low_res), 8 - len(imgs))):
-                    imgs.append(high_res[i])
-                    imgs.append(low_res[i])
-                    imgs.append(generated[i])
-                    tags.append("high_res_" + str(i))
-                    tags.append("low_res_" + str(i))
-                    tags.append("generated_res_" + str(i))
+        if len(imgs) < 8:
+            for i in range(min(len(low_res), 8 - len(imgs))):
+                imgs.append(high_res[i])
+                imgs.append(low_res[i])
+                imgs.append(generated[i])
+                tags.append("high_res_" + str(i))
+                tags.append("low_res_" + str(i))
+                tags.append("generated_res_" + str(i))
             # break
 
         outputs = torch.cat(outputs, dim=0)
