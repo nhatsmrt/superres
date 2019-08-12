@@ -160,3 +160,68 @@ class DeepLaplacianPyramidNet(nn.Module):
             scale *= 2
 
         return outputs
+
+
+class DeepLaplacianPyramidNetV2(nn.Module):
+    """
+    Second version of deep laplacian pyramid net, which reuses the layers recursively
+
+    References:
+
+        Wei-Sheng Lai et al. "Deep Laplacian Pyramid Networks for Fast and Accurate Super-Resolution"
+        https://arxiv.org/pdf/1704.03915.pdf
+    """
+    def __init__(self, max_scale_factor: int):
+        assert max_scale_factor >= 2
+        assert 2 ** (int(np.log2(max_scale_factor))) == max_scale_factor
+
+        super(DeepLaplacianPyramidNetV2, self).__init__()
+        self.max_scale_factor = max_scale_factor
+
+        self.conv_in = ConvolutionalLayer(
+            in_channels=3, out_channels=64, padding=1,
+            activation=nn.LeakyReLU, normalization=nn.Identity
+        )
+        self.feature_embedding = nn.Sequential(
+            CustomResidualBlock(in_channels=64),
+            PixelShuffleConvolutionLayer(in_channels=64, out_channels=64, upscale_factor=2)
+        )
+        self.upsampling = PixelShuffleConvolutionLayer(in_channels=3, out_channels=3, upscale_factor=2)
+        self.conv_res = ConvolutionalLayer(
+            in_channels=64, out_channels=3, padding=1,
+            activation=nn.LeakyReLU, normalization=nn.Identity
+        )
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, input: Tensor, upscale_factor: Optional[int]=None) -> Tensor:
+        scale = 2
+        output = input
+        feature = self.conv_in(input)
+
+        while scale <= upscale_factor:
+            upsampled = self.upsampling(output)
+            feature = self.feature_embedding(feature)
+
+            residual = self.conv_res(feature)
+            output = self.sigmoid(residual + upsampled)
+            scale *= 2
+
+        return output
+
+    def generate_pyramid(self, input: Tensor) -> List[Tensor]:
+        scale = 2
+        output = input
+        feature = self.conv_in(input)
+        outputs = []
+
+        while scale <= self.max_scale_factor:
+            upsampled = self.upsampling(output)
+            feature = self.feature_embedding(feature)
+
+            residual = self.conv_res(feature)
+            output = self.sigmoid(residual + upsampled)
+            scale *= 2
+            outputs.append(output)
+
+        return outputs
+

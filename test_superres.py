@@ -1,6 +1,6 @@
 from superres.metrics import PSNR
 from superres.learner import SuperResolutionLearner, MultiResolutionLearner
-from superres.models import PixelShuffleUpsampler, DeepLaplacianPyramidNet
+from superres.models import PixelShuffleUpsampler, DeepLaplacianPyramidNetV2
 
 from nntoolbox.vision.utils import UnlabelledImageListDataset, UnsupervisedFromSupervisedDataset
 from nntoolbox.vision.losses import CharbonnierLoss, CharbonnierLossV2
@@ -20,14 +20,14 @@ mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
 print("Begin creating dataset")
-images = UnlabelledImageListDataset("data/train2014/", transform=Compose(
-    [
-        Resize((512, 512)),
-        RandomCrop((128, 128))
-    ]
-))
+# images = UnlabelledImageListDataset("data/train2014/", transform=Compose(
+#     [
+#         Resize((512, 512)),
+#         RandomCrop((128, 128))
+#     ]
+# ))
 
-# images = UnsupervisedFromSupervisedDataset(CIFAR10(root="data/CIFAR/", download=True, train=True, transform=ToTensor()))
+images = UnsupervisedFromSupervisedDataset(CIFAR10(root="data/CIFAR/", download=True, train=True, transform=ToTensor()))
 
 upscale_factor = 4
 batch_size = 64
@@ -45,7 +45,7 @@ dataloader_val = DataLoader(val_dataset, batch_size=batch_size)
 
 print("Creating models")
 
-model = DeepLaplacianPyramidNet(max_scale_factor=upscale_factor)
+model = DeepLaplacianPyramidNetV2(max_scale_factor=upscale_factor)
 print("Finish creating model")
 optimizer = Adam(model.parameters())
 learner = MultiResolutionLearner(
