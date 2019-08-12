@@ -43,7 +43,10 @@ class SuperResolutionLearner(Learner):
         return self._cb_handler.on_train_end()
 
     def learn_one_iter(self, high_res: Tensor):
-        low_res = F.interpolate(high_res, scale_factor=self.scale_factor, mode=self.downsampling_mode)
+        low_res = torch.clamp(
+            F.interpolate(high_res, scale_factor=self.scale_factor, mode=self.downsampling_mode),
+            0.0, 1.0
+        )
 
         data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, True)
         high_res, low_res = data['high_res'], data['low_res']
@@ -78,7 +81,10 @@ class SuperResolutionLearner(Learner):
         labels = []
 
         for high_res in self._val_data:
-            low_res = F.interpolate(high_res, scale_factor=(self.scale_factor, self.scale_factor))
+            low_res = torch.clamp(
+                F.interpolate(high_res, scale_factor=self.scale_factor, mode=self.downsampling_mode),
+                0.0, 1.0
+            )
             data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, False)
             high_res, low_res = data['high_res'], data['low_res']
             generated = self.generate(low_res, False)
@@ -144,7 +150,7 @@ class MultiResolutionLearner(Learner):
 
     def learn_one_iter(self, high_res: Tensor):
         pyramid = [
-            F.interpolate(high_res, scale_factor=scale, mode=self.downsampling_mode)
+            torch.clamp(F.interpolate(high_res, scale_factor=scale, mode=self.downsampling_mode), 0.0, 1.0)
             for scale in self.scale_factors if scale != 1.0
         ]
         pyramid += [high_res]
@@ -187,7 +193,9 @@ class MultiResolutionLearner(Learner):
 
         # for high_res in self._val_data:
         high_res = grab_next_batch(self._val_data)
-        low_res = F.interpolate(high_res, scale_factor=self.scale_factors[0])
+        low_res = torch.clamp(
+            F.interpolate(high_res, scale_factor=self.scale_factors[0], mode=self.downsampling_mode), 0.0, 1.0
+        )
         data = self._cb_handler.on_batch_begin({'high_res': high_res, 'low_res': low_res}, False)
         high_res, low_res = data['high_res'], data['low_res']
         generated = self._model(low_res, self.max_upscale_factor)
