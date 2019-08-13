@@ -80,6 +80,6 @@ callbacks = [
     ModelCheckpoint(learner=learner, save_best_only=False, filepath='weights/model.pt'),
 ]
 learner.learn(
-    n_epoch=7, downsampling_mode='bicubic', metrics=metrics, callbacks=callbacks,
+    n_epoch=10, downsampling_mode='bicubic', metrics=metrics, callbacks=callbacks,
     max_upscale_factor=upscale_factor, final_metric='ssim'
 )
