@@ -7,7 +7,7 @@ I use the Microsoft COCO dataset as training data. I resize each image first to 
 I train for only 10 epochs using Adam optimizer with default setting, which means that the results could be much better with more hyperparameter tuning or longer training.
 
 ## Reproduction
-Code for training can be found in test_superres.py, and code for inference can be found in test_inference.py. Note that this project made use of my [nn-toolbox](https://github.com/nhatsmrt/nn-toolbox/tree/experimental/nntoolbox) for various components and training procedures (you might want the experimental branch for latest updates). It also use another repository of mine for the computation of the SSIM metric, generative-models, which is unreleased.
+Code for training can be found in test_superres.py, and code for inference can be found in test_inference.py. Note that this project made use of my [nn-toolbox](https://github.com/nhatsmrt/nn-toolbox/tree/experimental/nntoolbox) for various components and training procedures (you might want the experimental branch for latest updates). It also use another repository of mine for the computation of the SSIM metric, generative-models, which is unreleased at the moment.
 <br />
 Pretrained weights can be downloaded [here](https://drive.google.com/file/d/1YwTJr8VPYibOYLXh3JdKNkp1JJZDomXD/view?usp=sharing).
 ## Results
@@ -46,3 +46,5 @@ Super resolution using neural network (PSNR: 27.3232, SSIM: 0.9014):
 2. <em>Wei-Sheng Lai, Jia-Bin Huang, Narendra Ahuja, Ming-Hsuan Yang.</em> Fast and Accurate Image Super-Resolution with Deep Laplacian Pyramid Networks. https://arxiv.org/abs/1710.01992
 
 3. COCO dataset: http://cocodataset.org/#download. Licensed under a Creative Commons Attribution 4.0 License.
+
+4. The test images are from https://pixabay.com/photos/cat-young-animal-curious-wildcat-2083492/ and https://www.pexels.com/photo/grey-and-white-short-fur-cat-104827/
