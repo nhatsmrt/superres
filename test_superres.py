@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 
 from torchvision.transforms import Compose, Resize, RandomCrop, ToTensor, RandomHorizontalFlip
 from torchvision.datasets import CIFAR10
-from torch.optim import SGD, Adam
+from torch.optim import SGD, Adam, AdamW
 
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
@@ -62,6 +62,7 @@ model = DeepLaplacianPyramidNetV2(max_scale_factor=upscale_factor)
 print("Finish creating model")
 # optimizer = SGD(model.parameters(), lr=1e-5, momentum=0.9, weight_decay=1e-4)
 optimizer = Adam(model.parameters())
+# optimizer = Adam(model.parameters(), weight_decay=1e-4)
 learner = MultiResolutionLearner(
     dataloader, dataloader_val,
     model, criterion=CharbonnierLossV2(), optimizer=optimizer
