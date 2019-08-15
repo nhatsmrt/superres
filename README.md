@@ -16,29 +16,29 @@ The high resolution image is first resized using bicubic interpolation to obtain
 
 Original high resolution image:
 
-<img src="demo/high_res.jpg"  alt="high_res_1" width="250"/>
+<img src="demo/high_res.jpg"  alt="high_res_1" width="512"/>
 
 Super resolution using bicubic (PSNR: 24.6858, SSIM: 0.8688):
 
-<img src="demo/poor_quality.jpg" alt="generated_1" width="250" />
+<img src="demo/poor_quality.jpg" alt="generated_1" width="512" />
 
 Super resolution using neural network (PSNR: 25.2227, SSIM: 0.8738):
 
-<img src="demo/generated.jpg" alt="generated_1" width="250" />
+<img src="demo/generated.jpg" alt="generated_1" width="512" />
 
 ## Cat 2:
 
 Original high resolution image:
 
-<img src="demo/high_res_2.jpg"  alt="high_res_2" width="250"/>
+<img src="demo/high_res_2.jpg"  alt="high_res_2" width="512"/>
 
 Super resolution using bicubic (PSNR: 27.5483, SSIM: 0.8965):
 
-<img src="demo/poor_quality_2.jpg" alt="generated_2" width="250" />
+<img src="demo/poor_quality_2.jpg" alt="generated_2" width="512" />
 
 Super resolution using neural network (PSNR: 27.3232, SSIM: 0.9014):
 
-<img src="demo/generated_2.jpg" alt="generated_2" width="250" />
+<img src="demo/generated_2.jpg" alt="generated_2" width="512" />
 
 ## References:
 1. <em>Wei-Sheng Lai, Jia-Bin Huang, Narendra Ahuja, Ming-Hsuan Yang.</em> Deep Laplacian Pyramid Networks for Fast and Accurate Super-Resolution. https://arxiv.org/abs/1704.03915
