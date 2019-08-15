@@ -1,0 +1,6 @@
+__pycache__/
+superres/__pycache__/
+.idea
+data/
+runs/
+weights/

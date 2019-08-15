@@ -45,5 +45,4 @@ Super resolution using neural network (PSNR: 27.3232, SSIM: 0.9014):
 
 2. <em>Wei-Sheng Lai, Jia-Bin Huang, Narendra Ahuja, Ming-Hsuan Yang.</em> Fast and Accurate Image Super-Resolution with Deep Laplacian Pyramid Networks. https://arxiv.org/abs/1710.01992
 
-3. COCO dataset: http://cocodataset.org/#download
-Licensed under a Creative Commons Attribution 4.0 License.
+3. COCO dataset: http://cocodataset.org/#download. Licensed under a Creative Commons Attribution 4.0 License.
