@@ -5,7 +5,8 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, RandomCrop, ToTensor, RandomHorizontalFlip
 
 from nntoolbox.vision.utils import pil_to_tensor, tensor_to_pil
-from nntoolbox.vision.transforms import Identity, VerticalFlip, Rotation90, Rotation180, Rotation270, BatchCompose
+from nntoolbox.vision.transforms import Identity, BatchVerticalFlip, BatchRotation90, \
+    BatchRotation180, BatchRotation270, BatchCompose
 from torch import Tensor
 from PIL import Image
 
@@ -15,7 +16,7 @@ class SuperResolutionizer:
     Super resolutionizer. Implement geometric self-ensembling trick.
 
     References:
-        
+
         Radu Timofte, Rasmus Rothe, Luc Van Gool. "Seven ways to improve example-based single image super resolution."
         https://arxiv.org/pdf/1511.02228.pdf
     """
@@ -26,17 +27,17 @@ class SuperResolutionizer:
         self.use_geometric_ensemble = use_geometric_ensemble
         if use_geometric_ensemble:
             self.geometric_transforms = [
-                Identity(), VerticalFlip(), Rotation90(), Rotation180(), Rotation270(),
-                BatchCompose([Rotation90(), VerticalFlip()]),
-                BatchCompose([Rotation180(), VerticalFlip()]),
-                BatchCompose([Rotation270(), VerticalFlip()])
+                Identity(), BatchVerticalFlip(), BatchRotation90(), BatchRotation180(), BatchRotation270(),
+                BatchCompose([BatchRotation90(), BatchVerticalFlip()]),
+                BatchCompose([BatchRotation180(), BatchVerticalFlip()]),
+                BatchCompose([BatchRotation270(), BatchVerticalFlip()])
             ]
 
             self.inverse_transforms = [
-                Identity(), VerticalFlip(), Rotation270(), Rotation180(), Rotation90(),
-                BatchCompose([VerticalFlip(), Rotation270()]),
-                BatchCompose([VerticalFlip(), Rotation180()]),
-                BatchCompose([VerticalFlip(), Rotation90()])
+                Identity(), BatchVerticalFlip(), BatchRotation270(), BatchRotation180(), BatchRotation90(),
+                BatchCompose([BatchVerticalFlip(), BatchRotation270()]),
+                BatchCompose([BatchVerticalFlip(), BatchRotation180()]),
+                BatchCompose([BatchVerticalFlip(), BatchRotation90()])
             ]
 
     @torch.no_grad()
