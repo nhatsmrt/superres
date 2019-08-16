@@ -89,9 +89,9 @@ class SuperResolutionLearner(Learner):
             high_res, low_res = data['high_res'], data['low_res']
             generated = self.generate(low_res, False)
             low_res = torch.clamp(
-                F.interpolate(low_res, scale_factor=1.0 / self.scale_factors[0], mode=self.downsampling_mode), 0.0, 1.0
+                F.interpolate(low_res, scale_factor=1.0 / self.scale_factor, mode=self.downsampling_mode), 0.0, 1.0
             )
-            
+
             outputs.append(generated)
             labels.append(high_res)
 

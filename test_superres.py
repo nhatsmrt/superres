@@ -62,7 +62,7 @@ model = DeepLaplacianPyramidNetV2(max_scale_factor=upscale_factor)
 print("Finish creating model")
 # optimizer = SGD(model.parameters(), lr=1e-5, momentum=0.9, weight_decay=1e-4)
 optimizer = Adam(model.parameters())
-# optimizer = Adam(model.parameters(), weight_decay=1e-4)
+# optimizer = AdamW(model.parameters(), weight_decay=1e-4)
 learner = MultiResolutionLearner(
     dataloader, dataloader_val,
     model, criterion=CharbonnierLossV2(), optimizer=optimizer
