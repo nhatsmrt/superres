@@ -11,6 +11,14 @@ from PIL import Image
 
 
 class SuperResolutionizer:
+    """
+    Super resolutionizer. Implement geometric self-ensembling trick.
+
+    References:
+        
+        Radu Timofte, Rasmus Rothe, Luc Van Gool. "Seven ways to improve example-based single image super resolution."
+        https://arxiv.org/pdf/1511.02228.pdf
+    """
     def __init__(self, model, use_geometric_ensemble: bool = True):
         self.model = model
         self.model.eval()
