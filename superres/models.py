@@ -391,4 +391,4 @@ class NAPModelV2(nn.Module):
         #     torch.stack([outputs[i][l] for i in range(len(outputs))], dim=0).mean(0)
         #     for l in range(len(outputs[0]))
         # ]
-        return [[self.op(op) for op in t] for t in outputs]
+        return [[self.op(op) for op in t[1:]] for t in outputs]
