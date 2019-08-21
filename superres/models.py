@@ -382,7 +382,7 @@ class NAPModelV2(nn.Module):
         assert 2 ** (int(np.log2(upscale_factor))) == upscale_factor
         input = self.conv_in(input)
         output = self.nap(input, return_all_states=False)[int(np.log2(upscale_factor))]
-        return self.sigmoid(self.conv_op(output))
+        return self.op(output)
 
     def generate_pyramid(self, input: Tensor) -> List[List[Tensor]]:
         input = self.conv_in(input)
