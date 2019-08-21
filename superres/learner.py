@@ -223,3 +223,18 @@ class MultiResolutionLearner(Learner):
         labels = torch.cat(labels, dim=0)
 
         return self._cb_handler.on_epoch_end({"draw": imgs, "tag": tags, "outputs": outputs, "labels": labels})
+
+
+class NAPV2MSLearner(MultiResolutionLearner):
+    def generate(self, low_res: Tensor, train: bool) -> List[Tensor]:
+        return self._cb_handler.after_outputs({"output": self._model.generate_pyramid(low_res)}, train)["output"]
+
+    def compute_loss(self, pyramid: List[Tensor], train: bool) -> Tensor:
+        generated_pyramid = self.generate(pyramid[0], train)
+        loss = 0
+        normalizing_factor = (len(pyramid) - 1) * sum([(t + 1) ** 2 for t in range(len(generated_pyramid))])
+        for t in range(len(generated_pyramid)):
+            for i in range(len(pyramid) - 1):
+                loss = loss + self._criterion(generated_pyramid[t][i], pyramid[i + 1]) * (t + 1) ** 2
+        loss = loss / normalizing_factor
+        return self._cb_handler.after_losses({"loss": loss}, train)["loss"]

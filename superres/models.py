@@ -381,15 +381,14 @@ class NAPModelV2(nn.Module):
         if upscale_factor is None: upscale_factor = 2 ** self.n_level
         assert 2 ** (int(np.log2(upscale_factor))) == upscale_factor
         input = self.conv_in(input)
-        outputs = self.nap(input, return_all_states=True)[1]
-        output = torch.stack([op[int(np.log2(upscale_factor))] for op in outputs], dim=0).mean(0)
-        return self.op(output)
+        output = self.nap(input, return_all_states=False)[int(np.log2(upscale_factor))]
+        return self.sigmoid(self.conv_op(output))
 
-    def generate_pyramid(self, input: Tensor) -> List[Tensor]:
+    def generate_pyramid(self, input: Tensor) -> List[List[Tensor]]:
         input = self.conv_in(input)
-        outputs = self.nap(input, return_all_states=False)[1]
-        outputs = [
-            torch.stack([outputs[i][l] for i in range(len(outputs))], dim=0).mean(0)
-            for l in range(len(outputs[0]))
-        ]
-        return [self.op(op) for op in outputs]
+        outputs = self.nap(input, return_all_states=True)[1]
+        # outputs = [
+        #     torch.stack([outputs[i][l] for i in range(len(outputs))], dim=0).mean(0)
+        #     for l in range(len(outputs[0]))
+        # ]
+        return [[self.op(op) for op in t] for t in outputs]
