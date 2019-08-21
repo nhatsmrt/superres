@@ -1,4 +1,5 @@
 from torch import nn, Tensor
+import torch
 import torch.nn.functional as F
 from nntoolbox.vision.components import PixelShuffleConvolutionLayer, \
     ResNeXtBlock, ConvolutionalLayer, NeuralAbstractionPyramid
@@ -274,14 +275,8 @@ class NAPModel(nn.Module):
     def __init__(self, n_level: int=2):
         super().__init__()
         self.n_level = n_level
-        # lateral_connection = ConvolutionalLayer(
-        #             in_channels=64, out_channels=64, activation=leaky_relu,
-        #             kernel_size=3, padding=1, normalization=nn.Identity
-        # )
-        # lateral_connections = [lateral_connection for _ in range(n_level + 1)]
         lateral_connections = [nn.Identity() for _ in range(n_level + 1)]
         feature_embedding = RecursiveResidualBlock(
-            # CustomResidualBlock(in_channels=64, activation=leaky_relu, normalization=nn.Identity),
             nn.Sequential(
                 ConvolutionalLayer(
                     in_channels=64, out_channels=64, activation=leaky_relu,
@@ -333,3 +328,68 @@ class NAPModel(nn.Module):
         outputs = self.nap(input, return_all_states=False)[1:]
         return [self.sigmoid(self.conv_op(op)) for op in outputs]
 
+
+class NAPModelV2(nn.Module):
+    def __init__(self, n_level: int=2):
+        super().__init__()
+        self.n_level = n_level
+        lateral_connection = ConvolutionalLayer(
+                    in_channels=64, out_channels=64, activation=leaky_relu,
+                    kernel_size=3, padding=1, normalization=nn.Identity
+        )
+        lateral_connections = [lateral_connection for _ in range(n_level + 1)]
+        feature_embedding = RecursiveResidualBlock(
+            nn.Sequential(
+                ConvolutionalLayer(
+                    in_channels=64, out_channels=64, activation=leaky_relu,
+                    kernel_size=3, padding=1, normalization=nn.Identity
+                ),
+                ConvolutionalLayer(
+                    in_channels=64, out_channels=64, activation=leaky_relu,
+                    kernel_size=3, padding=1, normalization=nn.Identity
+                )
+            ),
+            recursive_level=2
+        )
+        feature_upsampling = PixelShuffleConvolutionLayer(
+            in_channels=64, out_channels=64, upscale_factor=2, activation=leaky_relu, normalization=nn.Identity
+        )
+        forward_connections = [nn.Sequential(feature_embedding, feature_upsampling) for _ in range(n_level)]
+        backward_connections = [
+            ConvolutionalLayer(
+                in_channels=64, out_channels=64, kernel_size=3, padding=1, stride=2, normalization=nn.Identity,
+                activation=leaky_relu
+            )
+            for _ in range(n_level)
+        ]
+
+        self.nap = NeuralAbstractionPyramid(
+            forward_connections=forward_connections, backward_connections=backward_connections,
+            lateral_connections=lateral_connections, activation_function=nn.Identity(), normalization=nn.Identity(),
+            duration=3
+        )
+        self.conv_in = ConvolutionalLayer(
+            in_channels=3, out_channels=64, padding=1,
+            activation=leaky_relu, normalization=nn.Identity
+        )
+        self.op = ConvolutionalLayer(
+            in_channels=64, out_channels=3, padding=1,
+            activation=nn.Sigmoid, normalization=nn.Identity
+        )
+
+    def forward(self, input: Tensor, upscale_factor: Optional[int] = None) -> Tensor:
+        if upscale_factor is None: upscale_factor = 2 ** self.n_level
+        assert 2 ** (int(np.log2(upscale_factor))) == upscale_factor
+        input = self.conv_in(input)
+        outputs = self.nap(input, return_all_states=True)[1]
+        output = torch.stack([op[int(np.log2(upscale_factor))] for op in outputs], dim=0).mean(0)
+        return self.op(output)
+
+    def generate_pyramid(self, input: Tensor) -> List[Tensor]:
+        input = self.conv_in(input)
+        outputs = self.nap(input, return_all_states=False)[1]
+        outputs = [
+            torch.stack([outputs[i][l] for i in range(len(outputs))], dim=0).mean(0)
+            for l in range(len(outputs[0]))
+        ]
+        return [self.op(op) for op in outputs]
