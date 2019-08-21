@@ -271,7 +271,7 @@ class DeepLaplacianPyramidNetV2(nn.Module):
 
 
 class NAPModel(nn.Module):
-    def __init__(self, n_level: int=4):
+    def __init__(self, n_level: int=2):
         super().__init__()
         self.n_level = n_level
         lateral_connections = [nn.Identity() for _ in range(n_level + 1)]
