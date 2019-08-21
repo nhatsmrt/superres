@@ -1,6 +1,6 @@
 from superres.metrics import PSNR
-from superres.learner import SuperResolutionLearner, MultiResolutionLearner
-from superres.models import PixelShuffleUpsampler, DeepLaplacianPyramidNetV2, NAPModel
+from superres.learner import SuperResolutionLearner, MultiResolutionLearner, NAPV2MSLearner
+from superres.models import PixelShuffleUpsampler, DeepLaplacianPyramidNetV2, NAPModel, NAPModelV2
 
 from nntoolbox.vision.utils import UnlabelledImageListDataset, UnsupervisedFromSupervisedDataset
 from nntoolbox.vision.losses import CharbonnierLossV2
@@ -59,12 +59,17 @@ dataloader_val = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 print("Creating models")
 
 # model = DeepLaplacianPyramidNetV2(max_scale_factor=upscale_factor)
-model = NAPModel()
+# model = NAPModel()
+model = NAPModelV2()
 print("Finish creating model")
 # optimizer = SGD(model.parameters(), lr=1e-5, momentum=0.9, weight_decay=1e-4)
 optimizer = Adam(model.parameters())
 # optimizer = AdamW(model.parameters(), weight_decay=1e-4)
-learner = MultiResolutionLearner(
+# learner = MultiResolutionLearner(
+#     dataloader, dataloader_val,
+#     model, criterion=CharbonnierLossV2(), optimizer=optimizer
+# )
+learner = NAPV2MSLearner(
     dataloader, dataloader_val,
     model, criterion=CharbonnierLossV2(), optimizer=optimizer
 )
