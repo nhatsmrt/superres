@@ -324,6 +324,7 @@ class NAPModel(nn.Module):
         input = self.conv_in(input)
         outputs = self.nap(input, return_all_states=False)
         print(len(outputs))
-        print(outputs[0])
+        print(len(outputs[0]))
+        print(outputs[0].shape)
         return [self.sigmoid(self.conv_op(op)) for op in outputs]
 
