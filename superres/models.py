@@ -274,6 +274,11 @@ class NAPModel(nn.Module):
     def __init__(self, n_level: int=2):
         super().__init__()
         self.n_level = n_level
+        # lateral_connection = ConvolutionalLayer(
+        #             in_channels=64, out_channels=64, activation=leaky_relu,
+        #             kernel_size=3, padding=1, normalization=nn.Identity
+        # )
+        # lateral_connections = [lateral_connection for _ in range(n_level + 1)]
         lateral_connections = [nn.Identity() for _ in range(n_level + 1)]
         feature_embedding = RecursiveResidualBlock(
             # CustomResidualBlock(in_channels=64, activation=leaky_relu, normalization=nn.Identity),
@@ -294,7 +299,10 @@ class NAPModel(nn.Module):
         )
         forward_connections = [nn.Sequential(feature_embedding, feature_upsampling) for _ in range(n_level)]
         backward_connections = [
-            ConvolutionalLayer(in_channels=64, out_channels=64, kernel_size=3, padding=1, stride=2)
+            ConvolutionalLayer(
+                in_channels=64, out_channels=64, kernel_size=3, padding=1, stride=2, normalization=nn.Identity,
+                activation=leaky_relu
+            )
             for _ in range(n_level)
         ]
 
