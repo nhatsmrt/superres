@@ -322,9 +322,6 @@ class NAPModel(nn.Module):
 
     def generate_pyramid(self, input: Tensor) -> List[Tensor]:
         input = self.conv_in(input)
-        outputs = self.nap(input, return_all_states=False)
-        print(len(outputs))
-        print(len(outputs[0]))
-        print(outputs[0][0].shape)
+        outputs = self.nap(input, return_all_states=False)[1:]
         return [self.sigmoid(self.conv_op(op)) for op in outputs]
 
